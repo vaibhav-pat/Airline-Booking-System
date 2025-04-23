@@ -3,9 +3,21 @@ import java.util.*;
 public class ReservationSystem {
     private List<Flight> flights = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();
+    private List<Passenger> passengers = new ArrayList<>();
+    private List<AirlineStaff> staffMembers = new ArrayList<>();
+
+    private User currentUser;
 
     public void addFlight(Flight flight) {
         flights.add(flight);
+    }
+
+    public boolean isPassenger() {
+        return currentUser instanceof Passenger;
+    }
+
+    public boolean isStaff() {
+        return currentUser instanceof AirlineStaff;
     }
 
     public Flight findFlightById(String flightId) {
@@ -96,5 +108,33 @@ public class ReservationSystem {
 
     public List<Flight> getFlights() {
         return flights;
+    }
+
+    public List<Flight> getAllFlights() {
+        return flights;
+    }
+    
+    public void registerPassenger(Passenger p) {
+        passengers.add(p);
+    }
+
+    public void registerStaff(AirlineStaff s) {
+        staffMembers.add(s);
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    public List<Passenger> getPassengers() {
+        return passengers;
+    }
+
+    public List<AirlineStaff> getStaffMembers() {
+        return staffMembers;
     }
 }

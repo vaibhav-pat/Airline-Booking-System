@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 
@@ -30,6 +31,8 @@ public class AirlineBookingUI extends JFrame {
         JButton viewButton = new JButton("View Reservations");
         JButton cancelButton = new JButton("Cancel Reservation");
         JButton addFlightButton = new JButton("Add Flight ✈️");
+        JButton ViewFlightButton = new JButton("View Flights ");
+        JButton loginSwitchButton = new JButton("Login / Register 👤");
 
 
         outputArea = new JTextArea(15, 40);
@@ -45,6 +48,8 @@ public class AirlineBookingUI extends JFrame {
         topPanel.add(viewButton);
         topPanel.add(cancelButton);
         topPanel.add(addFlightButton);
+        topPanel.add(ViewFlightButton);
+        topPanel.add(loginSwitchButton);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(10, 10));
@@ -59,6 +64,8 @@ public class AirlineBookingUI extends JFrame {
         viewButton.addActionListener(e -> viewReservations());
         cancelButton.addActionListener(e -> cancelReservation());
         addFlightButton.addActionListener(e -> addFlightUI());
+        ViewFlightButton.addActionListener(e -> viewAllFlights());
+        loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
     }
 
     private void updateFlightDropdown() {
@@ -72,6 +79,11 @@ public class AirlineBookingUI extends JFrame {
     }
 
     private void bookTicket() {
+        if (!isPassengerLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Login or register as passenger to book a flight. ", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int selectedIndex = flightDropdown.getSelectedIndex();
         if (selectedIndex == -1) {
             JOptionPane.showMessageDialog(this, "No flight selected!");
@@ -108,6 +120,10 @@ public class AirlineBookingUI extends JFrame {
     }
 
     private void cancelReservation() {
+        if (!isPassengerLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Login or register as passenger to cancel a flight.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         Map<String, String> summaryMap = reservationSystem.getReservationSummaryMap();
 
         if (summaryMap.isEmpty()) {
@@ -145,7 +161,14 @@ public class AirlineBookingUI extends JFrame {
             }
         }
     }
+
+    
     private void addFlightUI() {
+        if (!isStaffLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Login as Airline Staff to add flight.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JTextField flightNoField = new JTextField();
         JTextField sourceField = new JTextField();
         JTextField destinationField = new JTextField();
@@ -189,6 +212,108 @@ public class AirlineBookingUI extends JFrame {
             }
         }
     }
+
+    private void viewAllFlights() {
+        List<Flight> allFlights = reservationSystem.getAllFlights();
+
+        if (allFlights.isEmpty()) {
+            outputArea.append("No flights available.\n");
+            return;
+        }
+
+        outputArea.append("✈️ Available Flights:\n");
+        for (Flight flight : allFlights) {
+            outputArea.append("• " + flight.getFlightId() + " (" 
+                + flight.getSource() + " → " + flight.getDestination() 
+                + ") - Seats: " + flight.getAvailableSeats() + "\n");
+        }
+    }
+
+    private void loginOrRegisterUI() {
+        String[] options = {"Login", "Register"};
+        int action = JOptionPane.showOptionDialog(this, "Choose action:", "Login/Register",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+        if (action == 0) {
+            loginUI();
+        } else if (action == 1) {
+            registerUI();
+        }
+    }
+
+    private void loginUI() {
+        String[] roles = {"Passenger", "Airline Staff"};
+        String role = (String) JOptionPane.showInputDialog(this, "Select Role:",
+                "Login As", JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
+
+        String name = JOptionPane.showInputDialog(this, "Enter your name:");
+
+        if (name == null || name.trim().isEmpty()) return;
+
+        User user = null;
+
+        if ("Passenger".equals(role)) {
+            for (Passenger p : reservationSystem.getPassengers()) {
+                if (p.getName().equalsIgnoreCase(name.trim())) {
+                    user = p;
+                    break;
+                }
+            }
+        } else {
+            for (AirlineStaff s : reservationSystem.getStaffMembers()) {
+                if (s.getName().equalsIgnoreCase(name.trim())) {
+                    user = s;
+                    break;
+                }
+            }
+        }
+
+        if (user != null) {
+            reservationSystem.setCurrentUser(user);
+            outputArea.append("🔐 Logged in as " + user.getName() + " (" + role + ")\n");
+        } else {
+            JOptionPane.showMessageDialog(this, "User not found. Try registering.");
+        }
+    }
+
+    private void registerUI() {
+        String[] roles = {"Passenger", "Airline Staff"};
+        String role = (String) JOptionPane.showInputDialog(this, "Select Role:",
+                "Register As", JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
+
+        String name = JOptionPane.showInputDialog(this, "Enter your name:");
+        String email = JOptionPane.showInputDialog(this, "Enter your email:");
+        String phone = JOptionPane.showInputDialog(this, "Enter your phone:");
+
+        if (name == null || email == null || phone == null ||
+            name.trim().isEmpty() || email.trim().isEmpty() || phone.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required.");
+            return;
+        }
+
+        if ("Passenger".equals(role)) {
+            Passenger p = new Passenger(name.trim(), email.trim(), phone.trim());
+            reservationSystem.registerPassenger(p);
+            reservationSystem.setCurrentUser(p);
+        } else {
+            AirlineStaff s = new AirlineStaff(name.trim(), email.trim(), phone.trim());
+            reservationSystem.registerStaff(s);
+            reservationSystem.setCurrentUser(s);
+        }
+
+        outputArea.append("🆕 Registered & logged in as: " + name + " (" + role + ")\n");
+    }
+
+    private boolean isStaffLoggedIn() {
+        User user = reservationSystem.getCurrentUser();
+        return user instanceof AirlineStaff;
+    }
+
+    private boolean isPassengerLoggedIn() {
+        User user = reservationSystem.getCurrentUser();
+        return user instanceof Passenger;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(AirlineBookingUI::new);
