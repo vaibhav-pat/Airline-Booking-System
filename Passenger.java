@@ -1,9 +1,14 @@
 public class Passenger extends User {
     private String passportNumber;
+    private String id;
 
     public Passenger(String userId, String name, String passportNumber) {
         super(userId, name);
         this.passportNumber = passportNumber;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getPassportNumber() {

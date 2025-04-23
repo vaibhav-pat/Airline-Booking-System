@@ -27,24 +27,61 @@ public class ReservationSystem {
         return null;
     }
 
-    public void cancelReservation(String reservationId) {
-        Iterator<Reservation> iterator = reservations.iterator();
-        while (iterator.hasNext()) {
-            Reservation res = iterator.next();
-            if (res.getReservationId().equals(reservationId)) {
-                res.getFlight().cancelSeat();
-                iterator.remove();
-                System.out.println("Reservation cancelled: " + reservationId);
-                return;
+    public boolean cancelReservation(String reservationId) {
+        Reservation reservationToCancel = null;
+        for (Reservation reservation : reservations) {
+            if (reservation.getReservationId().equals(reservationId)) {
+                reservationToCancel = reservation;
+                break;
             }
         }
-        System.out.println("Reservation ID not found.");
+
+        if (reservationToCancel != null) {
+            reservations.remove(reservationToCancel);
+            return true; // Successfully cancelled
+        } else {
+            return false; // Reservation not found
+        }
+    }
+
+    public List<String> getAllReservationIds() {
+        List<String> ids = new ArrayList<>();
+        for (Reservation res : reservations) {
+            ids.add(res.getReservationId());
+        }
+        return ids;
     }
 
     public void listReservations() {
-        for (Reservation res : reservations) {
-            res.displayReservation();
+        if (reservations.isEmpty()) {
+            System.out.println("No reservations found.");
+        } else {
+            for (Reservation res : reservations) {
+                System.out.println("Reservation ID: " + res.getReservationId()
+                    + ", Passenger: " + res.getPassenger().getName()
+                    + ", Flight: " + res.getFlight().getFlightId());
+            }
         }
+    }
+
+    public List<String> getAllReservationSummaries() {
+        List<String> summaries = new ArrayList<>();
+        for (Reservation res : reservations) {
+            String flightInfo = res.getFlight().getFlightId() + 
+                " (" + res.getFlight().getOrigin() + " → " + res.getFlight().getDestination() + ")";
+            summaries.add(flightInfo);
+        }
+        return summaries;
+    }
+
+    public Map<String, String> getReservationSummaryMap() {
+        Map<String, String> map = new LinkedHashMap<>(); // Keeps insertion order
+        for (Reservation res : reservations) {
+            String summary = res.getFlight().getFlightId() + 
+                " (" + res.getFlight().getOrigin() + " → " + res.getFlight().getDestination() + ")";
+            map.put(res.getReservationId(), summary);
+        }
+        return map;
     }
 
     public void listFlights() {
@@ -60,4 +97,5 @@ public class ReservationSystem {
     public List<Flight> getFlights() {
         return flights;
     }
+
 }
