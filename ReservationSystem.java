@@ -68,7 +68,7 @@ public class ReservationSystem {
         List<String> summaries = new ArrayList<>();
         for (Reservation res : reservations) {
             String flightInfo = res.getFlight().getFlightId() + 
-                " (" + res.getFlight().getOrigin() + " → " + res.getFlight().getDestination() + ")";
+                " (" + res.getFlight().getSource() + " → " + res.getFlight().getDestination() + ")";
             summaries.add(flightInfo);
         }
         return summaries;
@@ -78,7 +78,7 @@ public class ReservationSystem {
         Map<String, String> map = new LinkedHashMap<>(); // Keeps insertion order
         for (Reservation res : reservations) {
             String summary = res.getFlight().getFlightId() + 
-                " (" + res.getFlight().getOrigin() + " → " + res.getFlight().getDestination() + ")";
+                " (" + res.getFlight().getSource() + " → " + res.getFlight().getDestination() + ")";
             map.put(res.getReservationId(), summary);
         }
         return map;
@@ -97,5 +97,4 @@ public class ReservationSystem {
     public List<Flight> getFlights() {
         return flights;
     }
-
 }

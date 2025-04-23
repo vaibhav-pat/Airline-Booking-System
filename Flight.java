@@ -1,14 +1,14 @@
 public class Flight {
     private String flightId;
-    private String origin;
+    private String source;
     private String destination;
     private String departureTime;
     private int capacity;
     private int availableSeats;
 
-    public Flight(String flightId, String origin, String destination, String departureTime, int capacity) {
+    public Flight(String flightId, String source, String destination, String departureTime, int capacity) {
         this.flightId = flightId;
-        this.origin = origin;
+        this.source = source;
         this.destination = destination;
         this.departureTime = departureTime;
         this.capacity = capacity;
@@ -34,12 +34,12 @@ public class Flight {
     }
 
     public void displayFlightInfo() {
-        System.out.println("Flight: " + flightId + ", From: " + origin + ", To: " + destination +
+        System.out.println("Flight: " + flightId + ", From: " + source + ", To: " + destination +
                 ", Departure: " + departureTime + ", Available Seats: " + availableSeats);
     }
 
-    public String getOrigin() {
-        return origin;
+    public String getSource() {
+        return source;
     }
 
     public String getDestination() {
