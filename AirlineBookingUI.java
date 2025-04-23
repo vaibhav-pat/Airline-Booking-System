@@ -15,11 +15,13 @@ public class AirlineBookingUI extends JFrame {
     private JButton cancelButton;
     private JButton logoutButton;
     private JButton loginSwitchButton;
+    private JLabel statusLabel;
 
 
     public AirlineBookingUI() {
         reservationSystem = new ReservationSystem();
-        currentPassenger = new Passenger("P001", "Vaibhav", "X12345");
+        currentPassenger = null;
+        reservationSystem.setCurrentUser(null);
 
         // Dummy flights
         reservationSystem.addFlight(new Flight("F101", "Delhi", "Mumbai", "10:00 AM", 5));
@@ -70,6 +72,12 @@ public class AirlineBookingUI extends JFrame {
         add(mainPanel);
         setVisible(true);
 
+        statusLabel = new JLabel("🚪 Not Logged In");
+        statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        mainPanel.add(statusLabel, BorderLayout.SOUTH);
+
+
         // Actions
         bookButton.addActionListener(e -> bookTicket());
         viewButton.addActionListener(e -> viewReservations());
@@ -78,6 +86,8 @@ public class AirlineBookingUI extends JFrame {
         ViewFlightButton.addActionListener(e -> viewAllFlights());
         loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
         logoutButton.addActionListener(e -> logout());
+
+        updateUIBasedOnUserRole();  // This will hide/show buttons based on currentUser
 
     }
 
@@ -88,13 +98,23 @@ public class AirlineBookingUI extends JFrame {
         boolean isPassenger = user instanceof Passenger;
         boolean isStaff = user instanceof AirlineStaff;
 
-        bookButton.setEnabled(isPassenger);
-        viewButton.setEnabled(isPassenger);
-        cancelButton.setEnabled(isPassenger);
-        addFlightButton.setEnabled(isStaff);
-        logoutButton.setEnabled(isLoggedIn);
-        loginSwitchButton.setEnabled(!isLoggedIn);
+        bookButton.setVisible(isPassenger);
+        viewButton.setVisible(isPassenger);
+        cancelButton.setVisible(isPassenger);
+        addFlightButton.setVisible(isStaff);
+
+        logoutButton.setVisible(isLoggedIn);
+        loginSwitchButton.setVisible(!isLoggedIn);
+
+        if (isLoggedIn) {
+            String role = isPassenger ? "Passenger" : "Staff";
+            statusLabel.setText("👤 Logged in as: " + user.getName() + " (" + role + ")");
+        } else {
+            statusLabel.setText("🚪 Not Logged In");
+        }
     }
+
+
 
     private void updateFlightDropdown() {
         flightDropdown.removeAllItems();
