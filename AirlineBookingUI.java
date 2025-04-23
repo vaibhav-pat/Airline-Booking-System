@@ -9,6 +9,14 @@ public class AirlineBookingUI extends JFrame {
     private JComboBox<String> flightDropdown;
     private JTextArea outputArea;
 
+    private JButton addFlightButton;
+    private JButton bookButton;
+    private JButton viewButton;
+    private JButton cancelButton;
+    private JButton logoutButton;
+    private JButton loginSwitchButton;
+
+
     public AirlineBookingUI() {
         reservationSystem = new ReservationSystem();
         currentPassenger = new Passenger("P001", "Vaibhav", "X12345");
@@ -27,19 +35,20 @@ public class AirlineBookingUI extends JFrame {
         flightDropdown = new JComboBox<>();
         updateFlightDropdown();
 
-        JButton bookButton = new JButton("Book Ticket");
-        JButton viewButton = new JButton("View Reservations");
-        JButton cancelButton = new JButton("Cancel Reservation");
-        JButton addFlightButton = new JButton("Add Flight ✈️");
+        bookButton = new JButton("Book Ticket");
+        viewButton = new JButton("View Reservations");
+        cancelButton = new JButton("Cancel Reservation");
+        addFlightButton = new JButton("Add Flight ✈️");
         JButton ViewFlightButton = new JButton("View Flights ");
-        JButton loginSwitchButton = new JButton("Login / Register 👤");
+        loginSwitchButton = new JButton("Login / Register 👤");
+        logoutButton = new JButton("Logout 🔓");
+
 
 
         outputArea = new JTextArea(15, 40);
         outputArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(outputArea);
 
-        // Layout
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new GridLayout(2, 2, 10, 10));
         topPanel.add(flightLabel);
@@ -50,6 +59,8 @@ public class AirlineBookingUI extends JFrame {
         topPanel.add(addFlightButton);
         topPanel.add(ViewFlightButton);
         topPanel.add(loginSwitchButton);
+        topPanel.add(logoutButton);
+
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(10, 10));
@@ -66,6 +77,23 @@ public class AirlineBookingUI extends JFrame {
         addFlightButton.addActionListener(e -> addFlightUI());
         ViewFlightButton.addActionListener(e -> viewAllFlights());
         loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
+        logoutButton.addActionListener(e -> logout());
+
+    }
+
+    private void updateUIBasedOnUserRole() {
+        User user = reservationSystem.getCurrentUser();
+
+        boolean isLoggedIn = user != null;
+        boolean isPassenger = user instanceof Passenger;
+        boolean isStaff = user instanceof AirlineStaff;
+
+        bookButton.setEnabled(isPassenger);
+        viewButton.setEnabled(isPassenger);
+        cancelButton.setEnabled(isPassenger);
+        addFlightButton.setEnabled(isStaff);
+        logoutButton.setEnabled(isLoggedIn);
+        loginSwitchButton.setEnabled(!isLoggedIn);
     }
 
     private void updateFlightDropdown() {
@@ -271,6 +299,7 @@ public class AirlineBookingUI extends JFrame {
         if (user != null) {
             reservationSystem.setCurrentUser(user);
             outputArea.append("🔐 Logged in as " + user.getName() + " (" + role + ")\n");
+            updateUIBasedOnUserRole();
         } else {
             JOptionPane.showMessageDialog(this, "User not found. Try registering.");
         }
@@ -302,6 +331,7 @@ public class AirlineBookingUI extends JFrame {
         }
 
         outputArea.append("🆕 Registered & logged in as: " + name + " (" + role + ")\n");
+        updateUIBasedOnUserRole();
     }
 
     private boolean isStaffLoggedIn() {
@@ -318,4 +348,16 @@ public class AirlineBookingUI extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(AirlineBookingUI::new);
     }
+
+    private void logout() {
+        User currentUser = reservationSystem.getCurrentUser();
+        if (currentUser != null) {
+            outputArea.append("👋 Logged out: " + currentUser.getName() + "\n");
+            reservationSystem.setCurrentUser(null);
+            updateUIBasedOnUserRole();
+        } else {
+            outputArea.append("⚠️ No user is currently logged in.\n");
+        }
+    }
+
 }
