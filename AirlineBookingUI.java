@@ -26,6 +26,11 @@ public class AirlineBookingUI extends JFrame {
         // Dummy flights
         reservationSystem.addFlight(new Flight("F101", "Delhi", "Mumbai", "10:00 AM", 5));
         reservationSystem.addFlight(new Flight("F102", "Mumbai", "Bangalore", "3:00 PM", 3));
+        reservationSystem.addFlight(new Flight("F103", "Hyderabad", "Mysore" ,"2:15 PM", 19));
+        reservationSystem.addFlight(new Flight("F104", "OOty", "Prayagraj" ,"2:45 PM", 46));
+        reservationSystem.addFlight(new Flight("F105", "Hyderabad", "Mumbai" ,"12:15 AM", 1));
+        reservationSystem.addFlight(new Flight("F106", "Indore", "Delhi" ,"9:35 PM", 24));
+        reservationSystem.addFlight(new Flight("F107", "Hyderabad", "Mysore" ,"2:15 PM", 19));
 
         setTitle("Airline Booking System");
         setSize(1200, 900);
