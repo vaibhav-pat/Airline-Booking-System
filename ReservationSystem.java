@@ -47,6 +47,7 @@ public class ReservationSystem {
         if (flight != null && flight.bookSeat()) {
             Reservation reservation = new Reservation(passenger, flight);
             reservations.add(reservation);
+            passenger.addReservation(reservation);
             return reservation;
         }
         return null;
@@ -67,6 +68,18 @@ public class ReservationSystem {
         } else {
             return false; // Reservation not found
         }
+    }
+    public List<Passenger> getPassengersByFlight(String flightId) {
+        List<Passenger> result = new ArrayList<>();
+        for (Passenger p : passengers) {
+            for (Reservation r : p.getReservations()) {
+                if (r.getFlight().getFlightId().equals(flightId)) {
+                    result.add(p);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     public List<String> getAllReservationIds() {

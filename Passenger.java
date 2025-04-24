@@ -1,4 +1,7 @@
+import java.util.ArrayList;
+import java.util.List;
 public class Passenger extends User {
+    private List<Reservation> reservations;
     private String passportNumber;
     private String id;
     private String bookingHistory;
@@ -7,10 +10,15 @@ public class Passenger extends User {
         super(name,email,phone ,password);
         this.passportNumber = passportNumber;
         this.bookingHistory = "";
+        this.reservations = new ArrayList<>();
     }
 
     public String getId() {
         return id;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 
     public String getPassportNumber() {
@@ -29,6 +37,10 @@ public class Passenger extends User {
         this.phone = phone;
     }
 
+    public void addReservation(Reservation reservation) {
+        reservations.add(reservation);
+    }
+
    @Override
     public void displayInfo() {
         System.out.println("Passenger ID: " + getUserId());
@@ -42,4 +54,5 @@ public class Passenger extends User {
     public void addBooking(String bookingDetails) {
         this.bookingHistory += bookingDetails + "\n";
     }
+
 }

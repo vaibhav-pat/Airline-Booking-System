@@ -1,4 +1,3 @@
-import com.sun.tools.attach.AgentInitializationException;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +50,7 @@ public class AirlineBookingUI extends JFrame {
         loginSwitchButton = new JButton("Login / Register 👤");
         logoutButton = new JButton("Logout 🔓");
         JButton managePassengersButton = new JButton("Manage Passengers 👥");
+        JButton manageFlightPassengersButton = new JButton("Manage Flight Passengers ✈️");
 
 
 
@@ -71,6 +71,7 @@ public class AirlineBookingUI extends JFrame {
         topPanel.add(loginSwitchButton);
         topPanel.add(logoutButton);
         topPanel.add(managePassengersButton);
+        topPanel.add(manageFlightPassengersButton);
 
 
         JPanel mainPanel = new JPanel();
@@ -96,6 +97,7 @@ public class AirlineBookingUI extends JFrame {
         loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
         logoutButton.addActionListener(e -> logout());
         managePassengersButton.addActionListener(e -> openPassengerManagementUI());
+        manageFlightPassengersButton.addActionListener(e -> openFlightPassengerManager());
 
 
         bookButton.setToolTipText("Book a flight (Passenger only)");
@@ -147,11 +149,15 @@ public class AirlineBookingUI extends JFrame {
             return;
         }
 
+        // ✅ Get the current logged-in user and cast it to Passenger
+        Passenger passenger = (Passenger) reservationSystem.getCurrentUser();
+
         int selectedIndex = flightDropdown.getSelectedIndex();
         if (selectedIndex == -1) {
             JOptionPane.showMessageDialog(this, "No flight selected!");
             return;
         }
+
         Flight selectedFlight = reservationSystem.getFlights().get(selectedIndex);
 
         if (selectedFlight.getAvailableSeats() <= 0) {
@@ -159,7 +165,8 @@ public class AirlineBookingUI extends JFrame {
             return;
         }
 
-        Reservation res = reservationSystem.makeReservation(currentPassenger, selectedFlight.getFlightId());
+        // ✅ Use the correct Passenger object here
+        Reservation res = reservationSystem.makeReservation(passenger, selectedFlight.getFlightId());
         if (res != null) {
             outputArea.append("✅ Booking Confirmed: " + res.getReservationId() + "\n");
             updateFlightDropdown();
@@ -167,6 +174,7 @@ public class AirlineBookingUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Booking failed!");
         }
     }
+
 
     private void viewReservations() {
         Map<String, String> summaryMap = reservationSystem.getReservationSummaryMap();
@@ -456,4 +464,59 @@ public class AirlineBookingUI extends JFrame {
             outputArea.append("✏️ Updated passenger: " + passenger.getName() + "\n");
         }
     }
+    private void openFlightPassengerManager() {
+        if (!isStaffLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Access restricted to staff only.", "Unauthorized", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<Flight> flights = reservationSystem.getAllFlights();
+        if (flights.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No flights available.");
+            return;
+        }
+
+        String[] flightNames = flights.stream()
+            .map(f -> f.getFlightId() + " - " + f.getSource() + " to " + f.getDestination())
+            .toArray(String[]::new);
+
+        String selectedFlightInfo = (String) JOptionPane.showInputDialog(
+                this,
+                "Select a flight:",
+                "Flight List",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                flightNames,
+                flightNames[0]);
+
+        if (selectedFlightInfo != null) {
+            String flightId = selectedFlightInfo.split(" - ")[0];
+            List<Passenger> passengersOnFlight = reservationSystem.getPassengersByFlight(flightId);
+
+            if (passengersOnFlight.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No passengers booked on this flight.");
+            } else {
+                showFlightPassengersDialog(passengersOnFlight);
+            }
+        }
+    }
+
+    private void showFlightPassengersDialog(List<Passenger> passengerList) {
+        StringBuilder info = new StringBuilder("👥 Passengers on this flight:\n\n");
+        for (Passenger p : passengerList) {
+            info.append("Name: ").append(p.getName()).append("\n");
+            info.append("Email: ").append(p.getEmail()).append("\n");
+            info.append("Phone: ").append(p.getPhone()).append("\n");
+            info.append("-----------------------------\n");
+        }
+
+        JTextArea textArea = new JTextArea(info.toString());
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(400, 300));
+
+        JOptionPane.showMessageDialog(this, scrollPane, "Passenger List", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+
 }
