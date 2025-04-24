@@ -1,5 +1,4 @@
 import java.util.*;
-
 public class ReservationSystem {
     private List<Flight> flights = new ArrayList<>();
     private List<Reservation> reservations = new ArrayList<>();

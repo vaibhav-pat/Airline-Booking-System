@@ -51,9 +51,7 @@ public class AirlineBookingUI extends JFrame {
         logoutButton = new JButton("Logout 🔓");
         JButton managePassengersButton = new JButton("Manage Passengers 👥");
         JButton manageFlightPassengersButton = new JButton("Manage Flight Passengers ✈️");
-
-
-
+        JButton managePassengerButton = new JButton("Manage Flight Passengers");
 
         outputArea = new JTextArea(15, 40);
         outputArea.setEditable(false);
@@ -72,6 +70,7 @@ public class AirlineBookingUI extends JFrame {
         topPanel.add(logoutButton);
         topPanel.add(managePassengersButton);
         topPanel.add(manageFlightPassengersButton);
+        topPanel.add(managePassengerButton);
 
 
         JPanel mainPanel = new JPanel();
@@ -98,7 +97,7 @@ public class AirlineBookingUI extends JFrame {
         logoutButton.addActionListener(e -> logout());
         managePassengersButton.addActionListener(e -> openPassengerManagementUI());
         manageFlightPassengersButton.addActionListener(e -> openFlightPassengerManager());
-
+        managePassengerButton.addActionListener(e -> showPassengersForFlight());
 
         bookButton.setToolTipText("Book a flight (Passenger only)");
         addFlightButton.setToolTipText("Add a new flight (Staff only)");
@@ -516,6 +515,47 @@ public class AirlineBookingUI extends JFrame {
         scrollPane.setPreferredSize(new Dimension(400, 300));
 
         JOptionPane.showMessageDialog(this, scrollPane, "Passenger List", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showPassengersForFlight() {
+        if (!isStaffLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Only airline staff can view this.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<Flight> allFlights = reservationSystem.getAllFlights();
+        if (allFlights.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No flights available.");
+            return;
+        }
+
+        String[] flightOptions = allFlights.stream()
+            .map(f -> f.getFlightId() + " | " + f.getSource() + " → " + f.getDestination())
+            .toArray(String[]::new);
+
+        String selected = (String) JOptionPane.showInputDialog(
+            this,
+            "Select flight to view booked passengers:",
+            "Flight Selection",
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            flightOptions,
+            flightOptions[0]
+        );
+
+        if (selected != null) {
+            String flightId = selected.split(" \\| ")[0].trim();
+            List<Passenger> passengers = reservationSystem.getPassengersByFlight(flightId);
+
+            if (passengers.isEmpty()) {
+                outputArea.append("👥 No passengers found for flight " + flightId + "\n");
+            } else {
+                outputArea.append("👥 Passengers for flight " + flightId + ":\n");
+                for (Passenger p : passengers) {
+                    outputArea.append("• " + p.getName() + " (" + p.getEmail() + ", " + p.getPhone() + ")\n");
+                }
+            }
+        }
     }
 
 
