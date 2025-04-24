@@ -10,7 +10,7 @@ public class Main {
         system.addFlight(new Flight("F102", "Mumbai", "Bangalore", "3:00 PM", 3));
 
         // Add a passenger
-        Passenger passenger = new Passenger("P001", "Vaibhav", "X12345");
+        Passenger passenger = new Passenger("Vaibhav","vaibhavpatidar987@gmail.com","9131292458","Vaibhav123");
 
         while (true) {
             System.out.println("\n1. View Flights\n2. Make Reservation\n3. Cancel Reservation\n4. View Reservations\n5. Exit");

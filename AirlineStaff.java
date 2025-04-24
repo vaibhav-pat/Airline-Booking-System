@@ -1,8 +1,8 @@
 public class AirlineStaff extends User {
     private String role;
 
-    public AirlineStaff(String userId, String name, String role) {
-        super(userId, name);
+    public AirlineStaff(String name, String email, String phone , String password, String role) {
+        super(name,email,phone,password);
         this.role = role;
     }
 
@@ -12,6 +12,10 @@ public class AirlineStaff extends User {
 
     @Override
     public void displayInfo() {
-        System.out.println("Staff: " + name + ", ID: " + userId + ", Role: " + role);
+        System.out.println("Staff ID: " + getUserId());
+        System.out.println("Name: " + getName());
+        System.out.println("Email: " + getEmail());
+        System.out.println("Phone: " + getPhone());
+        System.out.println("Role: " + role);
     }
 }

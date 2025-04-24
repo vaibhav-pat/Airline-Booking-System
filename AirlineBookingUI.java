@@ -28,7 +28,7 @@ public class AirlineBookingUI extends JFrame {
         reservationSystem.addFlight(new Flight("F102", "Mumbai", "Bangalore", "3:00 PM", 3));
 
         setTitle("Airline Booking System");
-        setSize(600, 500);
+        setSize(1200, 900);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -86,6 +86,10 @@ public class AirlineBookingUI extends JFrame {
         ViewFlightButton.addActionListener(e -> viewAllFlights());
         loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
         logoutButton.addActionListener(e -> logout());
+
+        bookButton.setToolTipText("Book a flight (Passenger only)");
+        addFlightButton.setToolTipText("Add a new flight (Staff only)");
+
 
         updateUIBasedOnUserRole();  // This will hide/show buttons based on currentUser
 
@@ -295,6 +299,14 @@ public class AirlineBookingUI extends JFrame {
                 "Login As", JOptionPane.PLAIN_MESSAGE, null, roles, roles[0]);
 
         String name = JOptionPane.showInputDialog(this, "Enter your name:");
+        String email = JOptionPane.showInputDialog(this, "Enter your email:");
+        JPasswordField passwordField = new JPasswordField();
+        int result = JOptionPane.showConfirmDialog(this, passwordField, "Enter your password:", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String password = new String(passwordField.getPassword());
+        }
+
 
         if (name == null || name.trim().isEmpty()) return;
 
@@ -333,19 +345,20 @@ public class AirlineBookingUI extends JFrame {
         String name = JOptionPane.showInputDialog(this, "Enter your name:");
         String email = JOptionPane.showInputDialog(this, "Enter your email:");
         String phone = JOptionPane.showInputDialog(this, "Enter your phone:");
+        String password = JOptionPane.showInputDialog(this, "Enter your password:");
 
-        if (name == null || email == null || phone == null ||
-            name.trim().isEmpty() || email.trim().isEmpty() || phone.trim().isEmpty()) {
+        if (name == null || email == null || phone == null || password == null ||
+            name.trim().isEmpty() || email.trim().isEmpty() || phone.trim().isEmpty() || password.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required.");
             return;
         }
 
         if ("Passenger".equals(role)) {
-            Passenger p = new Passenger(name.trim(), email.trim(), phone.trim());
+            Passenger p = new Passenger(name.trim(), email.trim(), phone.trim(), password.trim());
             reservationSystem.registerPassenger(p);
             reservationSystem.setCurrentUser(p);
         } else {
-            AirlineStaff s = new AirlineStaff(name.trim(), email.trim(), phone.trim());
+            AirlineStaff s = new AirlineStaff(name.trim(), email.trim(), phone.trim(), password.trim(),role.trim());
             reservationSystem.registerStaff(s);
             reservationSystem.setCurrentUser(s);
         }
