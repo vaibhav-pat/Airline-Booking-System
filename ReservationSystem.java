@@ -20,6 +20,19 @@ public class ReservationSystem {
         return currentUser instanceof AirlineStaff;
     }
 
+    public List<Passenger> getAllPassengers() {
+        return passengers;
+    }
+
+    public Passenger findPassengerByName(String name) {
+        for (Passenger p : passengers) {
+            if (p.getName().equalsIgnoreCase(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     public Flight findFlightById(String flightId) {
         for (Flight f : flights) {
             if (f.getFlightId().equals(flightId)) {

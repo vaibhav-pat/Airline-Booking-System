@@ -1,3 +1,4 @@
+import com.sun.tools.attach.AgentInitializationException;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ public class AirlineBookingUI extends JFrame {
         JButton ViewFlightButton = new JButton("View Flights ");
         loginSwitchButton = new JButton("Login / Register 👤");
         logoutButton = new JButton("Logout 🔓");
+        JButton managePassengersButton = new JButton("Manage Passengers 👥");
+
 
 
 
@@ -67,6 +70,7 @@ public class AirlineBookingUI extends JFrame {
         topPanel.add(ViewFlightButton);
         topPanel.add(loginSwitchButton);
         topPanel.add(logoutButton);
+        topPanel.add(managePassengersButton);
 
 
         JPanel mainPanel = new JPanel();
@@ -91,6 +95,8 @@ public class AirlineBookingUI extends JFrame {
         ViewFlightButton.addActionListener(e -> viewAllFlights());
         loginSwitchButton.addActionListener(e -> loginOrRegisterUI());
         logoutButton.addActionListener(e -> logout());
+        managePassengersButton.addActionListener(e -> openPassengerManagementUI());
+
 
         bookButton.setToolTipText("Book a flight (Passenger only)");
         addFlightButton.setToolTipText("Add a new flight (Staff only)");
@@ -398,4 +404,56 @@ public class AirlineBookingUI extends JFrame {
         }
     }
 
+    private void openPassengerManagementUI() {
+        if (!isStaffLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Only airline staff can manage passenger data.", "Access Denied", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        List<Passenger> passengers = reservationSystem.getAllPassengers();
+        if (passengers.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No registered passengers to display.");
+            return;
+        }
+
+        String[] names = passengers.stream().map(Passenger::getName).toArray(String[]::new);
+
+        String selectedName = (String) JOptionPane.showInputDialog(
+                this,
+                "Select a passenger to manage:",
+                "Manage Passenger",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                names,
+                names[0]);
+
+        if (selectedName != null) {
+            Passenger p = reservationSystem.findPassengerByName(selectedName);
+            if (p != null) {
+                showPassengerEditDialog(p);
+            }
+        }
+    }
+
+    private void showPassengerEditDialog(Passenger passenger) {
+        JTextField nameField = new JTextField(passenger.getName());
+        JTextField emailField = new JTextField(passenger.getEmail());
+        JTextField phoneField = new JTextField(passenger.getPhone());
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.add(new JLabel("Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Phone:"));
+        panel.add(phoneField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Edit Passenger Details", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            passenger.setName(nameField.getText().trim());
+            passenger.setEmail(emailField.getText().trim());
+            passenger.setPhone(phoneField.getText().trim());
+            outputArea.append("✏️ Updated passenger: " + passenger.getName() + "\n");
+        }
+    }
 }
