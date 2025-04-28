@@ -1,4 +1,5 @@
-public class AirlineStaff extends User {
+import java.io.Serializable;
+public class AirlineStaff extends User implements Serializable {
     private String role;
 
     public AirlineStaff(String name, String email, String phone , String password, String role) {

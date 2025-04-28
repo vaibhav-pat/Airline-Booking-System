@@ -16,6 +16,11 @@ public class AirlineBookingUI extends JFrame {
     private JButton logoutButton;
     private JButton loginSwitchButton;
     private JLabel statusLabel;
+    private static final String PASSENGER_DATA_FILE = "passengers.dat";
+    private static final String STAFF_DATA_FILE = "staff.dat";
+    private List<Passenger> passengers = DataManager.loadPassengers(PASSENGER_DATA_FILE);
+    private List<AirlineStaff> staffMembers = DataManager.loadStaff(STAFF_DATA_FILE);
+
 
 
     public AirlineBookingUI() {
@@ -101,7 +106,6 @@ public class AirlineBookingUI extends JFrame {
 
         bookButton.setToolTipText("Book a flight (Passenger only)");
         addFlightButton.setToolTipText("Add a new flight (Staff only)");
-
 
         updateUIBasedOnUserRole();  // This will hide/show buttons based on currentUser
 
@@ -230,6 +234,7 @@ public class AirlineBookingUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Failed to cancel reservation.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+        DataManager.savePassengers(passengers, PASSENGER_DATA_FILE);
     }
 
     
@@ -373,12 +378,18 @@ public class AirlineBookingUI extends JFrame {
 
         if ("Passenger".equals(role)) {
             Passenger p = new Passenger(name.trim(), email.trim(), phone.trim(), password.trim());
+            passengers.add(p);
+            DataManager.savePassengers(passengers, PASSENGER_DATA_FILE);
             reservationSystem.registerPassenger(p);
             reservationSystem.setCurrentUser(p);
+
         } else {
-            AirlineStaff s = new AirlineStaff(name.trim(), email.trim(), phone.trim(), password.trim(),role.trim());
-            reservationSystem.registerStaff(s);
-            reservationSystem.setCurrentUser(s);
+            AirlineStaff staff = new AirlineStaff(name.trim(), email.trim(), phone.trim(), password.trim(),role.trim());
+            staffMembers.add(staff);
+            DataManager.saveStaff(staffMembers, STAFF_DATA_FILE);
+            reservationSystem.registerStaff(staff);
+            reservationSystem.setCurrentUser(staff);
+
         }
 
         outputArea.append("🆕 Registered & logged in as: " + name + " (" + role + ")\n");
@@ -533,7 +544,7 @@ public class AirlineBookingUI extends JFrame {
             .map(f -> f.getFlightId() + " | " + f.getSource() + " → " + f.getDestination())
             .toArray(String[]::new);
 
-        String selected = (String) JOptionPane.showInputDialog(
+        String selectedFlight = (String) JOptionPane.showInputDialog(
             this,
             "Select flight to view booked passengers:",
             "Flight Selection",
@@ -543,20 +554,76 @@ public class AirlineBookingUI extends JFrame {
             flightOptions[0]
         );
 
-        if (selected != null) {
-            String flightId = selected.split(" \\| ")[0].trim();
+        if (selectedFlight != null) {
+            String flightId = selectedFlight.split(" \\| ")[0].trim();
             List<Passenger> passengers = reservationSystem.getPassengersByFlight(flightId);
 
             if (passengers.isEmpty()) {
                 outputArea.append("👥 No passengers found for flight " + flightId + "\n");
             } else {
-                outputArea.append("👥 Passengers for flight " + flightId + ":\n");
-                for (Passenger p : passengers) {
-                    outputArea.append("• " + p.getName() + " (" + p.getEmail() + ", " + p.getPhone() + ")\n");
+                String[] passengerOptions = passengers.stream()
+                    .map(p -> p.getName() + " (" + p.getEmail() + ")")
+                    .toArray(String[]::new);
+
+                String selectedPassenger = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select passenger to edit:",
+                    "Passenger Selection",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    passengerOptions,
+                    passengerOptions[0]
+                );
+
+                if (selectedPassenger != null) {
+                    int index = -1;
+                    for (int i = 0; i < passengerOptions.length; i++) {
+                        if (passengerOptions[i].equals(selectedPassenger)) {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    if (index != -1) {
+                        Passenger passenger = passengers.get(index);
+                        editPassengerDetails(passenger);
+                    }
                 }
             }
         }
     }
+    private void editPassengerDetails(Passenger passenger) {
+        JTextField nameField = new JTextField(passenger.getName());
+        JTextField emailField = new JTextField(passenger.getEmail());
+        JTextField phoneField = new JTextField(passenger.getPhone());
 
 
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.add(new JLabel("Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Phone:"));
+        panel.add(phoneField);
+
+        int result = JOptionPane.showConfirmDialog(
+            this,
+            panel,
+            "Edit Passenger Details",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            passenger.setName(nameField.getText().trim());
+            passenger.setEmail(emailField.getText().trim());
+            passenger.setPhone(phoneField.getText().trim());
+
+            outputArea.append("✅ Passenger details updated successfully.\n");
+        } else {
+            outputArea.append("✏️ Edit cancelled.\n");
+        }
+        DataManager.savePassengers(passengers, PASSENGER_DATA_FILE);
+    }
+    
 }

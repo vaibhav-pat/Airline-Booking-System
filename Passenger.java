@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-public class Passenger extends User {
+public class Passenger extends User implements Serializable {
     private List<Reservation> reservations;
     private String passportNumber;
     private String id;
@@ -8,7 +9,6 @@ public class Passenger extends User {
 
     public Passenger(String name, String email, String phone,String password) {
         super(name,email,phone ,password);
-        this.passportNumber = passportNumber;
         this.bookingHistory = "";
         this.reservations = new ArrayList<>();
     }
@@ -24,7 +24,7 @@ public class Passenger extends User {
     public String getPassportNumber() {
         return passportNumber;
     }
-    // get setter
+
     public void setName(String name) {
         this.name = name;
     }
